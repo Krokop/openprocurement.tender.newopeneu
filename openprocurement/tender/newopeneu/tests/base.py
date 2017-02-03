@@ -7,4 +7,4 @@ from openprocurement.tender.newopeneu.constants import TENDERING_DAYS
 now = datetime.now()
 test_tender_data = deepcopy(base_test_tender_data)
 test_tender_data["procurementMethodType"] = "newOpenEU"
-
+test_tender_data["tenderPeriod"] = {"endDate": (now + timedelta(days=TENDERING_DAYS + 1)).isoformat()}
