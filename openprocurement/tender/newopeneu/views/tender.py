@@ -101,8 +101,7 @@ class TenderNewEUResource(TenderResource):
             check_status(self.request)
         elif self.request.authenticated_role == 'tender_owner' and tender.status == 'active.tendering':
             tender.invalidate_bids_data()
-        elif self.request.authenticated_role == 'tender_owner' and self.request.validated[
-            'tender_status'] == 'active.pre-qualification' and tender.status == "active.pre-qualification.stand-still":
+        elif self.request.authenticated_role == 'tender_owner' and self.request.validated['tender_status'] == 'active.pre-qualification' and tender.status == "active.pre-qualification.stand-still":
             if any([i['status'] in self.request.validated['tender'].block_complaint_status for q in
                     self.request.validated['tender']['qualifications'] for i in q['complaints']]):
                 self.request.errors.add('body', 'data',
