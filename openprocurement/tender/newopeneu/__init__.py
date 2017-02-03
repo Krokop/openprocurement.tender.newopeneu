@@ -11,11 +11,7 @@ def includeme(config):
     :param config: Pyramid server configuration
     :return:
     """
+    from openprocurement.tender.newopeneu.models import (Tender)
     LOGGER.info('init newopeneu plugin')
-    # add two types of Competitive Dialogue
-    # config.add_tender_procurementMethodType(CompetitiveDialogUA)
-    # config.add_tender_procurementMethodType(CompetitiveDialogEU)
-    # config.add_tender_procurementMethodType(TenderStage2EU)
-    # config.add_tender_procurementMethodType(TenderStage2UA)
-    # config.scan("openprocurement.tender.competitivedialogue.views.stage1")
-    # config.scan("openprocurement.tender.competitivedialogue.views.stage2")
+    config.add_tender_procurementMethodType(Tender)
+    config.scan("openprocurement.tender.newopeneu.views")
