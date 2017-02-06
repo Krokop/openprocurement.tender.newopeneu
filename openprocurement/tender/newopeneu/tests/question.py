@@ -19,11 +19,9 @@ class TenderLotQuestionResourceTest(question.TenderLotQuestionResourceTest):
     relative_to = relative_to
     initial_data = test_tender_data
 
-    def test_create_tender_question(self):
-        None
+    test_create_tender_question = None
 
-    def test_patch_tender_question(self):
-        None
+    test_patch_tender_question = None
 
     def test_lot_tender_question(self):
         response = self.app.post_json('/tenders/{}/questions'.format(self.tender_id), {'data': {
