@@ -72,20 +72,17 @@ class TenderNewEUResource(TenderResource):
 
         """
         tender = self.context
-        if self.request.authenticated_role != 'Administrator' and tender.status in ['complete', 'unsuccessful',
-                                                                                    'cancelled']:
+        if self.request.authenticated_role != 'Administrator' and tender.status in ['complete', 'unsuccessful', 'cancelled']:
             self.request.errors.add('body', 'data', 'Can\'t update tender in current ({}) status'.format(tender.status))
             self.request.errors.status = 403
             return
         data = self.request.validated['data']
-        if self.request.authenticated_role == 'tender_owner' and 'status' in data and data['status'] not in [
-            'active.pre-qualification.stand-still', tender.status]:
+        if self.request.authenticated_role == 'tender_owner' and 'status' in data and data['status'] not in ['active.pre-qualification.stand-still', tender.status]:
             self.request.errors.add('body', 'data', 'Can\'t update tender status')
             self.request.errors.status = 403
             return
 
-        if self.request.authenticated_role == 'tender_owner' and self.request.validated[
-            'tender_status'] == 'active.tendering':
+        if self.request.authenticated_role == 'tender_owner' and self.request.validated['tender_status'] == 'active.tendering':
             if 'tenderPeriod' in data and 'endDate' in data['tenderPeriod']:
                 self.request.validated['tender'].tenderPeriod.import_data(data['tenderPeriod'])
                 if calculate_business_date(get_now(), TENDERING_EXTRA_PERIOD, self.request.validated['tender']) > \
@@ -95,16 +92,14 @@ class TenderNewEUResource(TenderResource):
                     self.request.errors.status = 403
                     return
                 self.request.validated['tender'].initialize()
-                self.request.validated['data']["enquiryPeriod"] = self.request.validated[
-                    'tender'].enquiryPeriod.serialize()
+                self.request.validated['data']["enquiryPeriod"] = self.request.validated['tender'].enquiryPeriod.serialize()
 
         apply_patch(self.request, save=False, src=self.request.validated['tender_src'])
         if self.request.authenticated_role == 'chronograph':
             check_status(self.request)
         elif self.request.authenticated_role == 'tender_owner' and tender.status == 'active.tendering':
             tender.invalidate_bids_data()
-        elif self.request.authenticated_role == 'tender_owner' and self.request.validated[
-            'tender_status'] == 'active.pre-qualification' and tender.status == "active.pre-qualification.stand-still":
+        elif self.request.authenticated_role == 'tender_owner' and self.request.validated['tender_status'] == 'active.pre-qualification' and tender.status == "active.pre-qualification.stand-still":
             if any([i['status'] in self.request.validated['tender'].block_complaint_status for q in
                     self.request.validated['tender']['qualifications'] for i in q['complaints']]):
                 self.request.errors.add('body', 'data',

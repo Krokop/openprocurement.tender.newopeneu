@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+
 TENDERING_DAYS = 3
 TENDERING_DURATION = timedelta(days=TENDERING_DAYS)
 QUESTIONS_STAND_STILL = timedelta(days=1)

@@ -12,6 +12,7 @@ def includeme(config):
     :param config: Pyramid server configuration
     :return:
     """
+
     LOGGER.info('init newopeneu plugin')
     config.add_tender_procurementMethodType(Tender)
     config.scan("openprocurement.tender.newopeneu.views")

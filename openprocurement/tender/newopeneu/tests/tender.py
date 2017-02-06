@@ -7,7 +7,6 @@ from openprocurement.tender.newopeneu.models import Tender
 from openprocurement.tender.newopeneu.tests.base import test_tender_data
 from openprocurement.tender.openeu.tests import tender
 from openprocurement.api.models import get_now, SANDBOX_MODE
-from openprocurement.tender.newopeneu.constants import TENDERING_DAYS, QUESTIONS_STAND_STILL, COMPLAINT_SUBMIT_TIME
 
 relative_to = os.path.dirname(__file__)
 
@@ -49,23 +48,14 @@ class TenderResourceTest(tender.TenderResourceTest):
         # make request with tenderPeriod duration 2 days
         data = test_tender_data['tenderPeriod']
         test_tender_data['tenderPeriod'] = {'startDate': get_now().isoformat(),
-                                            'endDate': (get_now() + timedelta(days=TENDERING_DAYS - 1)) .isoformat()}
+                                            'endDate': (get_now() + timedelta(days=2)) .isoformat()}
         response = self.app.post_json(request_path, {'data': test_tender_data}, status=422)
         test_tender_data['tenderPeriod'] = data
         self.assertEqual(response.status, '422 Unprocessable Entity')
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json['status'], 'error')
-        self.assertEqual(response.json['errors'][0]['description'][0], 'tenderPeriod should be greater than {} days'.format(TENDERING_DAYS))
+        self.assertEqual(response.json['errors'][0]['description'][0], 'tenderPeriod should be greater than 3 days')
 
-        # make request with tender duration 4 days
-        newEndDate = (get_now() + timedelta(days=TENDERING_DAYS + 1)).isoformat()
-        test_tender_data['tenderPeriod'] = {'startDate': get_now().isoformat(),
-                                            'endDate': newEndDate}
-        response = self.app.post_json(request_path, {'data': test_tender_data})
-        test_tender_data['tenderPeriod'] = data
-        self.assertEqual(response.status, '201 Created')
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json['data']['tenderPeriod']['endDate'], newEndDate)
 
     def test_enquiry_period_duration(self):
         request_path = '/tenders'
@@ -73,7 +63,7 @@ class TenderResourceTest(tender.TenderResourceTest):
         self.assertEqual(response.status, '201 Created')
         self.assertEqual(response.content_type, 'application/json')
         tenderPeriod_endDate = iso8601.parse_date(response.json['data']['tenderPeriod']['endDate'])
-        self.assertEqual(response.json['data']['enquiryPeriod']['endDate'], (tenderPeriod_endDate - QUESTIONS_STAND_STILL).isoformat())
+        self.assertEqual(response.json['data']['enquiryPeriod']['endDate'], (tenderPeriod_endDate - timedelta(days=1)).isoformat())
 
     def test_complaint_period_duration(self):
         request_path = '/tenders'
@@ -81,7 +71,8 @@ class TenderResourceTest(tender.TenderResourceTest):
         self.assertEqual(response.status, '201 Created')
         self.assertEqual(response.content_type, 'application/json')
         complaintPeriod_startDate = iso8601.parse_date(response.json['data']['complaintPeriod']['startDate'])
-        self.assertEqual(response.json['data']['complaintPeriod']['endDate'], (complaintPeriod_startDate + COMPLAINT_SUBMIT_TIME).isoformat())
+        self.assertEqual(response.json['data']['complaintPeriod']['endDate'], (complaintPeriod_startDate + timedelta(seconds=1)).isoformat())
+
 
 class TenderProcessTest(tender.TenderProcessTest):
     initial_auth = ('Basic', ('broker', ''))
