@@ -72,8 +72,7 @@ class TenderNewEUResource(TenderResource):
 
         """
         tender = self.context
-        if self.request.authenticated_role != 'Administrator' and tender.status in ['complete', 'unsuccessful',
-                                                                                    'cancelled']:
+        if self.request.authenticated_role != 'Administrator' and tender.status in ['complete', 'unsuccessful', 'cancelled']:
             self.request.errors.add('body', 'data', 'Can\'t update tender in current ({}) status'.format(tender.status))
             self.request.errors.status = 403
             return
@@ -93,8 +92,7 @@ class TenderNewEUResource(TenderResource):
                     self.request.errors.status = 403
                     return
                 self.request.validated['tender'].initialize()
-                self.request.validated['data']["enquiryPeriod"] = self.request.validated[
-                    'tender'].enquiryPeriod.serialize()
+                self.request.validated['data']["enquiryPeriod"] = self.request.validated['tender'].enquiryPeriod.serialize()
 
         apply_patch(self.request, save=False, src=self.request.validated['tender_src'])
         if self.request.authenticated_role == 'chronograph':
