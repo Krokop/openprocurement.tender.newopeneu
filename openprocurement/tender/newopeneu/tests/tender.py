@@ -56,7 +56,6 @@ class TenderResourceTest(tender.TenderResourceTest):
         self.assertEqual(response.json['status'], 'error')
         self.assertEqual(response.json['errors'][0]['description'][0], 'tenderPeriod should be greater than 3 days')
 
-
     def test_enquiry_period_duration(self):
         request_path = '/tenders'
         response = self.app.post_json(request_path, {'data': test_tender_data})
