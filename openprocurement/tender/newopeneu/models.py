@@ -2,18 +2,29 @@ from datetime import timedelta
 from schematics.exceptions import ValidationError
 from schematics.types.serializable import serializable
 from schematics.types.compound import ModelType
+from schematics.types import BooleanType
 
-from openprocurement.tender.openeu.models import Tender as OpenEUTender, EnquiryPeriod, ENQUIRY_STAND_STILL_TIME
+from openprocurement.tender.openeu.models import Tender as OpenEUTender, EnquiryPeriod, ENQUIRY_STAND_STILL_TIME, \
+                                                 Bid as BaseBid
 from schematics.types import StringType
 from openprocurement.tender.newopeneu.constants import TENDERING_DAYS, TENDERING_DURATION, QUESTIONS_STAND_STILL, \
-    COMPLAINT_STAND_STILL, PREQUALIFICATION_COMPLAINT_STAND_STILL, COMPLAINT_SUBMIT_TIME
+    COMPLAINT_SUBMIT_TIME
 from openprocurement.tender.openua.utils import calculate_business_date
 from openprocurement.api.models import get_now, Period
-from openprocurement.tender.openua.models import calculate_normalized_date
+from openprocurement.tender.openeu.models import SifterListType, BidModelType
+
+
+class Bid(BaseBid):
+    selfQualified = BooleanType()
+    selfEligible = BooleanType()
+    eligibilityDocuments = None
+    qualificationDocuments = None
 
 
 class Tender(OpenEUTender):
     procurementMethodType = StringType(default="newOpenEU")
+    bids = SifterListType(BidModelType(Bid), default=list(), filter_by='status',
+                          filter_in_values=['invalid', 'invalid.pre-qualification', 'deleted'])
 
     def validate_tenderPeriod(self, data, period):
         # if data['_rev'] is None when tender was created just now
@@ -45,5 +56,4 @@ class Tender(OpenEUTender):
     @serializable(type=ModelType(Period))
     def complaintPeriod(self):
         return Period(dict(startDate=self.tenderPeriod.startDate, endDate=calculate_business_date(self.tenderPeriod.startDate, COMPLAINT_SUBMIT_TIME, self)))
-
 
